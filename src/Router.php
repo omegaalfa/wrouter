@@ -2,7 +2,7 @@
 
 declare(strict_types = 1);
 
-namespace Omegalfa\Router;
+namespace Omegaalfa\Router;
 
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
