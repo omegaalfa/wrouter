@@ -2,7 +2,7 @@
   "name": "omegaalfa/router",
   "type": "library",
   "license": "MIT",
-  "description": "This library implements the Trie routing logic.",
+  "description": "This library implements the Trie routing logic",
   "keywords": [
     "router",
     "routes",
@@ -38,3 +38,4 @@
     "phpunit/phpunit": "^9.5"
   }
 }
+
