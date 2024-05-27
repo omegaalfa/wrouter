@@ -4,7 +4,7 @@ declare(strict_types = 1);
 
 use Laminas\Diactoros\Response;
 use Laminas\Diactoros\ServerRequestFactory;
-use Omegalfa\Router\Router;
+use Omegaalfa\Router\Router;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 
