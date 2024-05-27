@@ -1,6 +1,6 @@
 {
   "name": "omegaalfa/router",
-  "type": "project",
+  "type": "library",
   "license": "MIT",
   "description": "This library implements the Trie routing logic.",
   "keywords": [
