@@ -28,9 +28,9 @@ class Router extends TreeRouter
 	/**
 	 * @param  ServerRequestInterface  $request
 	 *
-	 * @return void
+	 * @return ResponseInterface
 	 */
-	protected function findRouteNoCached(ServerRequestInterface $request): void
+	protected function findRouteNoCached(ServerRequestInterface $request): ResponseInterface
 	{
 		$currentNode = $this->findRoute($request->getUri()->getPath());
 		$response = $this->response;
@@ -40,11 +40,11 @@ class Router extends TreeRouter
 
 		if(is_null($currentNode) || is_null($handler)) {
 			http_response_code(404);
-			return;
+			return $response;
 		}
 
 		if(!$handler instanceof \Closure) {
-			return;
+			return $response;
 		}
 
 		$dispatcherHandler = new Dispatcher($handler, $response, $params);
@@ -53,11 +53,10 @@ class Router extends TreeRouter
 				$dispatcherHandler = new MiddlewareDispatcher($middleware, $dispatcherHandler);
 			}
 
-			$dispatcherHandler->handle($request);
-			return;
+			return $dispatcherHandler->handle($request);
 		}
 
-		$dispatcherHandler->handle($request);
+		return $dispatcherHandler->handle($request);
 	}
 
 }
