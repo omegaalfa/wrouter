@@ -134,10 +134,10 @@ class Wrouter extends Router
 	/**
 	 * @param  ServerRequestInterface  $request
 	 *
-	 * @return void
+	 * @return ResponseInterface
 	 */
-	public function dispatcher(ServerRequestInterface $request): void
+	public function dispatcher(ServerRequestInterface $request): ResponseInterface
 	{
-		$this->findRouteNoCached($request);
+		return $this->findRouteNoCached($request);
 	}
 }
