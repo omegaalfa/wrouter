@@ -18,7 +18,8 @@
     "requests",
     "response",
     "middleware",
-    "Laminas\Diactoros",
+    "Laminas",
+    "Diactoros",
     "php8"
   ],
   "authors": [
