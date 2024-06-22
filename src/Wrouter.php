@@ -22,19 +22,26 @@ class Wrouter extends Router
 	 */
 	protected ?string $group = null;
 
+	/**
+	 * @var array<int, MiddlewareInterface>
+	 */
+	protected array $groupMiddlewares = [];
 
 	/**
-	 * @param  string    $prefix
-	 * @param  callable  $callback
+	 * @param  string                           $prefix
+	 * @param  callable                         $callback
+	 * @param  array<int, MiddlewareInterface>  $middlewares
 	 *
 	 * @return void
 	 */
-	public function group(string $prefix, callable $callback): void
+	public function group(string $prefix, callable $callback, array $middlewares = []): void
 	{
+		$this->groupMiddlewares = $middlewares;
 		$previousGroup = $this->group;
 		$this->group = trim($prefix, '/');
 		$callback($this);
 		$this->group = $previousGroup;
+		$this->groupMiddlewares = [];
 	}
 
 	/**
@@ -54,14 +61,13 @@ class Wrouter extends Router
 	}
 
 	/**
-	 * @param  string                           $method
-	 * @param  string                           $path
-	 * @param  callable                         $handler
-	 * @param  array<int, MiddlewareInterface>  $middlewares
+	 * @param  string    $method
+	 * @param  string    $path
+	 * @param  callable  $handler
 	 *
 	 * @return void
 	 */
-	public function map(string $method, string $path, callable $handler, array $middlewares = []): void
+	protected function map(string $method, string $path, callable $handler): void
 	{
 		$method = strtoupper($method);
 		if(!HttpMethod::isValid($method)) {
@@ -72,7 +78,7 @@ class Wrouter extends Router
 			$path = $this->buildFullPath($path);
 		}
 
-		$this->addRoute($path, $handler, $middlewares);
+		$this->addRoute($path, $handler, array_merge($this->groupMiddlewares, $this->middlewares));
 	}
 
 	/**
@@ -84,7 +90,8 @@ class Wrouter extends Router
 	 */
 	public function get(string $path, callable $handler, array $middlewares = []): static
 	{
-		$this->map('GET', $path, $handler, $middlewares);
+		$this->middlewares = $middlewares;
+		$this->map('GET', $path, $handler);
 
 		return $this;
 	}
@@ -98,7 +105,8 @@ class Wrouter extends Router
 	 */
 	public function post(string $path, callable $handler, array $middlewares = []): static
 	{
-		$this->map('POST', $path, $handler, $middlewares);
+		$this->middlewares = $middlewares;
+		$this->map('POST', $path, $handler);
 
 		return $this;
 	}
@@ -112,7 +120,8 @@ class Wrouter extends Router
 	 */
 	public function put(string $path, callable $handler, array $middlewares = []): static
 	{
-		$this->map('PUT', $path, $handler, $middlewares);
+		$this->middlewares = $middlewares;
+		$this->map('PUT', $path, $handler);
 
 		return $this;
 	}
@@ -126,7 +135,8 @@ class Wrouter extends Router
 	 */
 	public function delete(string $path, callable $handler, array $middlewares = []): static
 	{
-		$this->map('DELETE', $path, $handler, $middlewares);
+		$this->middlewares = $middlewares;
+		$this->map('DELETE', $path, $handler);
 
 		return $this;
 	}
