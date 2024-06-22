@@ -39,10 +39,12 @@ $router = new Wrouter($response);
 $router->get('/users/:id', function (RequestInterface $request, ResponseInterface $response, $params) {
     // Route handler logic
     echo "User ID:" . $params[':id'];
+    return $response;
 });
 
 $router->get('/admin', function (RequestInterface $request, ResponseInterface $response) {
     // Route handler logic
+    return $response;
 }, [new \src\router\src\LoggingMiddleware]);
 
 $router->dispatcher($request);
