@@ -24,7 +24,7 @@ PHP 8.1 or higher
 # Examples
 
 ```php
-use OmegaAlfa\Wrouter\Router;
+use OmegaAlfa\Wrouter\Wrouter;
 use Laminas\Diactoros\Response;
 use Laminas\Diactoros\ServerRequestFactory;
 use Psr\Http\Message\RequestInterface;
