@@ -3,7 +3,7 @@
 namespace OmegaAlfa\Wrouter\Tests;
 
 use PHPUnit\Framework\TestCase;
-use OmegaAlfa\Wrouter\Router;
+use OmegaAlfa\Wrouter\Wrouter;
 use Laminas\Diactoros\Response;
 use Laminas\Diactoros\ServerRequestFactory;
 use Psr\Http\Message\RequestInterface;
