@@ -10,6 +10,15 @@
     "TreeRoute",
     "NodeRoute",
     "Prefix Trees",
+    "PSR",
+    "PSR-7",
+    "PSR-15",
+    "HTTP",
+    "message",
+    "requests",
+    "response",
+    "middleware",
+    "Laminas\Diactoros",
     "php8"
   ],
   "authors": [
