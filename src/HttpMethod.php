@@ -2,7 +2,7 @@
 
 declare(strict_types = 1);
 
-namespace Omegaalfa\Router;
+namespace Omegaalfa\Wrouter;
 
 /**
  * Enumeração dos métodos HTTP válidos.
