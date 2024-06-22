@@ -4,7 +4,7 @@ declare(strict_types = 1);
 
 use Laminas\Diactoros\Response;
 use Laminas\Diactoros\ServerRequestFactory;
-use Omegaalfa\Router\Router;
+use Omegaalfa\Wrouter\Wrouter;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 
@@ -13,7 +13,7 @@ use Psr\Http\Message\ResponseInterface;
 $request = ServerRequestFactory::fromGlobals();
 $response = new Response();
 
-$router = new Router($request, $response);
+$router = new Wrouter($response);
 
 $router->group('/api', function() use ($router) {
 	$router->get('/user', function(RequestInterface $request, ResponseInterface $response) {
@@ -29,4 +29,4 @@ $router->get('/home', function(RequestInterface $request, ResponseInterface $res
 });
 
 
-$router->run();
+$router->dispatcher($request);
