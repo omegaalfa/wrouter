@@ -23,13 +23,19 @@ jobs:
       # Determine the range of commits to check since last push/pull request
       - name: Determine commit range
         id: commit-range
-        run: echo "::set-output name=range::$(git log --format='%H' -n 1 ${{ github.event.before }}..${{ github.sha }})"
+        run: |
+          LAST_COMMIT=$(git rev-parse ${{ github.event.before }} || true)
+          if [ -z "$LAST_COMMIT" ]; then
+            LAST_COMMIT=$(git rev-list --max-parents=0 HEAD)
+          fi
+          echo "LAST_COMMIT=$LAST_COMMIT" >> $GITHUB_ENV
+          echo "CURRENT_COMMIT=${{ github.sha }}" >> $GITHUB_ENV
 
       # Check commit messages within the determined range
       - name: Check commit messages
         id: commit-check
         run: |
-          git log --format='%s' "${{ steps.commit-range.outputs.range }}" | grep -E '^(feat|fix|docs|style|refactor|test|build|perf|ci|chore|revert|merge|wip): ' || echo "No conventional commits found."
+          git log --format='%s' "${LAST_COMMIT}..${CURRENT_COMMIT}" | grep -E '^(feat|fix|docs|style|refactor|test|build|perf|ci|chore|revert|merge|wip): ' || echo "No conventional commits found."
 
       # Verify commit messages
       - name: Verify commit messages
