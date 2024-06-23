@@ -18,10 +18,8 @@ $router->group('/api', function() use ($router) {
 		return $response;
 	});
 });
-
 $router->get('/home', function(RequestInterface $request, ResponseInterface $response) {
 	echo 'chamou /home';
 	return $response;
 });
-
 $router->dispatcher($request);
