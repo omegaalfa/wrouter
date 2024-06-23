@@ -53,6 +53,7 @@ jobs:
             echo "Commit messages are following Conventional Commits specification."
           fi
 
+
       - name: 🧰 Setup PHP
         uses: shivammathur/setup-php@v2
         with:
