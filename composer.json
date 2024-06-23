@@ -44,12 +44,13 @@
       "Tests\\": "tests/"
     }
   },
-  "minimum-stability": "dev",
   "require-dev": {
-    "phpunit/phpunit": "^9.5 || ^10.0"
+    "phpunit/phpunit": "^9.5 || ^10.0",
+    "friendsofphp/php-cs-fixer": "^3.0"
   },
   "scripts": {
-    "test": "phpunit"
-  }
+    "test": "phpunit",
+    "php-cs-fixer-dry-run": "php-cs-fixer fix --dry-run"
+  },
+  "minimum-stability": "dev"
 }
-
