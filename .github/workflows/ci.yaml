@@ -20,7 +20,7 @@ jobs:
       - name: Determine commit range
         id: commit-range
         run: |
-          git fetch --prune --unshallow
+          git fetch --prune
           LAST_COMMIT=$(git rev-parse ${{ github.event.before }} || git rev-parse HEAD~1)
           CURRENT_COMMIT=$(git rev-parse HEAD)
           echo "LAST_COMMIT=$LAST_COMMIT" >> $GITHUB_ENV
