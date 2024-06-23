@@ -1,26 +1,20 @@
 name: 🧪 CI
-
 on:
   push:
     branches:
       - 'main'
   pull_request:
-
 jobs:
   tests:
     runs-on: ubuntu-latest
-
     strategy:
       matrix:
         php: ["8.1"]
-
     name: ⚙️ Running test for PHP ${{ matrix.php }}
-
     steps:
       - name: 📥 Checkout code
         uses: actions/checkout@v4
 
-      # Determine the range of commits to check since last push/pull request
       - name: Determine commit range
         id: commit-range
         run: |
@@ -31,28 +25,25 @@ jobs:
           echo "LAST_COMMIT=$LAST_COMMIT" >> $GITHUB_ENV
           echo "CURRENT_COMMIT=${{ github.sha }}" >> $GITHUB_ENV
 
-      # Check commit messages within the determined range
       - name: Check commit messages
         id: commit-check
         run: |
-          git log --format='%s' "${LAST_COMMIT}..${CURRENT_COMMIT}" | grep -E '^(feat|fix|docs|style|refactor|test|build|perf|ci|chore|revert|merge|wip): ' || echo "No conventional commits found."
+          CONVENTIONAL_COMMITS=$(git log --format='%s' "${LAST_COMMIT}..${CURRENT_COMMIT}" | grep -E '^(feat|fix|docs|style|refactor|test|build|perf|ci|chore|revert|merge|wip): ' || true)
+          echo "stdout=$CONVENTIONAL_COMMITS" >> $GITHUB_OUTPUT
 
-      # Debugging output
       - name: Debug commit range
         run: |
           echo "Last commit: $LAST_COMMIT"
           echo "Current commit: $CURRENT_COMMIT"
 
-      # Verify commit messages
       - name: Verify commit messages
         run: |
-          if [ -z "${{ steps.commit-check.outputs.stdout }}"]; then
+          if [ -n "${{ steps.commit-check.outputs.stdout }}" ]; then
+            echo "Commit messages are following Conventional Commits specification."
+          else
             echo "Some commit messages do not follow Conventional Commits specification."
             exit 1
-          else
-            echo "Commit messages are following Conventional Commits specification."
           fi
-
 
       - name: 🧰 Setup PHP
         uses: shivammathur/setup-php@v2
