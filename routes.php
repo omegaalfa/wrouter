@@ -8,8 +8,6 @@ use Omegaalfa\Wrouter\Wrouter;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 
-
-
 $request = ServerRequestFactory::fromGlobals();
 $response = new Response();
 
@@ -22,11 +20,9 @@ $router->group('/api', function() use ($router) {
 	});
 });
 
-
 $router->get('/home', function(RequestInterface $request, ResponseInterface $response) {
 	echo 'chamou /home';
 	return $response;
 });
-
 
 $router->dispatcher($request);
