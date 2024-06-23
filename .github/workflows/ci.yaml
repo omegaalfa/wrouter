@@ -38,10 +38,12 @@ jobs:
 
       - name: Verify commit messages
         run: |
+          echo "Debug: Commit check output: '${{ steps.commit-check.outputs.stdout }}'"
           if [ -n "${{ steps.commit-check.outputs.stdout }}" ]; then
             echo "Commit messages are following Conventional Commits specification."
           else
             echo "Some commit messages do not follow Conventional Commits specification."
+            git log --format='%s' "${LAST_COMMIT}..${CURRENT_COMMIT}"
             exit 1
           fi
 
