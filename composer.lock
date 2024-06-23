@@ -4454,12 +4454,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/omegaalfa/wrouter.git",
-                "reference": "189a9706fb2af74a106129653577832fce105e65"
+                "reference": "0b77eb68369137b3e60e97576248685b3136954a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/omegaalfa/wrouter/zipball/189a9706fb2af74a106129653577832fce105e65",
-                "reference": "189a9706fb2af74a106129653577832fce105e65",
+                "url": "https://api.github.com/repos/omegaalfa/wrouter/zipball/0b77eb68369137b3e60e97576248685b3136954a",
+                "reference": "0b77eb68369137b3e60e97576248685b3136954a",
                 "shasum": ""
             },
             "require": {
@@ -4512,7 +4512,7 @@
                 "issues": "https://github.com/omegaalfa/wrouter/issues",
                 "source": "https://github.com/omegaalfa/wrouter/tree/main"
             },
-            "time": "2024-06-22T20:41:29+00:00"
+            "time": "2024-06-22T23:44:27+00:00"
         },
         {
             "name": "opis/closure",
