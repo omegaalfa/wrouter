@@ -14,27 +14,31 @@ jobs:
     steps:
       - name: 📥 Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Determine commit range
         id: commit-range
         run: |
-          LAST_COMMIT=$(git rev-parse ${{ github.event.before }} || true)
-          if [ -z "$LAST_COMMIT" ]; then
-            LAST_COMMIT=$(git rev-list --max-parents=0 HEAD)
-          fi
+          git fetch --prune --unshallow
+          LAST_COMMIT=$(git rev-parse ${{ github.event.before }} || git rev-parse HEAD~1)
+          CURRENT_COMMIT=$(git rev-parse HEAD)
           echo "LAST_COMMIT=$LAST_COMMIT" >> $GITHUB_ENV
-          echo "CURRENT_COMMIT=${{ github.sha }}" >> $GITHUB_ENV
+          echo "CURRENT_COMMIT=$CURRENT_COMMIT" >> $GITHUB_ENV
+          echo "Debug: Commit range $LAST_COMMIT..$CURRENT_COMMIT"
 
       - name: Check commit messages
         id: commit-check
         run: |
-          CONVENTIONAL_COMMITS=$(git log --format='%s' "${LAST_COMMIT}..${CURRENT_COMMIT}" | grep -E '^(feat|fix|docs|style|refactor|test|build|perf|ci|chore|revert|merge|wip): ' || true)
-          echo "stdout=$CONVENTIONAL_COMMITS" >> $GITHUB_OUTPUT
-
-      - name: Debug commit range
-        run: |
-          echo "Last commit: $LAST_COMMIT"
-          echo "Current commit: $CURRENT_COMMIT"
+          COMMITS=$(git log --format='%s' "${LAST_COMMIT}..${CURRENT_COMMIT}")
+          echo "Debug: All commits in range:"
+          echo "$COMMITS"
+          CONVENTIONAL_COMMITS=$(echo "$COMMITS" | grep -E '^(feat|fix|docs|style|refactor|test|build|perf|ci|chore|revert|merge|wip): ' || true)
+          echo "Debug: Conventional commits found:"
+          echo "$CONVENTIONAL_COMMITS"
+          echo "stdout<<EOF" >> $GITHUB_OUTPUT
+          echo "$CONVENTIONAL_COMMITS" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
 
       - name: Verify commit messages
         run: |
