@@ -10,7 +10,6 @@ use Psr\Http\Message\ResponseInterface;
 
 $request = ServerRequestFactory::fromGlobals();
 $response = new Response();
-
 $router = new Wrouter($response);
 
 $router->group('/api', function() use ($router) {
