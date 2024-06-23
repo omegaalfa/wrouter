@@ -2,7 +2,6 @@
 
 wrouter is a high-performance routing library implemented using Trie data structures. Designed for PHP 8, it focuses on speed and efficiency, making it suitable for large-scale applications.
 
-
 ## Installation
 
 ```bash
