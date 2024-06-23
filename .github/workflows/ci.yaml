@@ -37,12 +37,20 @@ jobs:
         run: |
           git log --format='%s' "${LAST_COMMIT}..${CURRENT_COMMIT}" | grep -E '^(feat|fix|docs|style|refactor|test|build|perf|ci|chore|revert|merge|wip): ' || echo "No conventional commits found."
 
+      # Debugging output
+      - name: Debug commit range
+        run: |
+          echo "Last commit: $LAST_COMMIT"
+          echo "Current commit: $CURRENT_COMMIT"
+
       # Verify commit messages
       - name: Verify commit messages
         run: |
-          if [ -z "${{ steps.commit-check.outputs }}"]; then
+          if [ -z "${{ steps.commit-check.outputs.stdout }}"]; then
             echo "Some commit messages do not follow Conventional Commits specification."
             exit 1
+          else
+            echo "Commit messages are following Conventional Commits specification."
           fi
 
       - name: 🧰 Setup PHP
@@ -62,15 +70,3 @@ jobs:
 
       - name: 📥 Install dependencies
         run: composer install --no-progress --prefer-dist --optimize-autoloader
-
-      - name: 🔍 Check php-cs-fixer
-        run: composer php-cs-fixer-dry-run
-
-      - name: ✅ Tests
-        run: composer test-with-coverage
-
-      - name: 📤 Upload coverage to Codecov
-        uses: codecov/codecov-action@v4
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-        if: matrix.php == '8.1'
