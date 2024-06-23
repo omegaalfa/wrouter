@@ -21,7 +21,18 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Check commit messages
+        id: commit-check
         uses: webiny/action-conventional-commits@v1.3.0
+        with:
+          from-ref: ${{ github.event.before || github.sha }}
+          to-ref: ${{ github.sha }}
+
+      - name: Verify commit messages
+        run: |
+          if [ "${{ steps.commit-check.outputs.isConventional }}" != "true" ]; then
+            echo "Some commit messages do not follow Conventional Commits specification."
+            exit 1
+          fi
 
       - name: 🧰 Setup PHP
         uses: shivammathur/setup-php@v2
@@ -51,4 +62,4 @@ jobs:
         uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-        if: matrix.php == '8.2'
+        if: matrix.php == '8.1'
