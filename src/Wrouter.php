@@ -8,7 +8,7 @@ namespace Omegaalfa\Wrouter;
 use JsonException;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Server\MiddlewareInterface;
-use src\wtrouter\emit\Emitter;
+use Omegaalfa\Wrouter\emit\Emitter;
 
 class Wrouter extends Router
 {
