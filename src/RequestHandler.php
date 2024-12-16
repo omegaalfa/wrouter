@@ -1,25 +1,23 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Omegaalfa\Wrouter;
 
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 
-class MiddlewareDispatcher implements RequestHandlerInterface
+class RequestHandler implements RequestHandlerInterface
 {
 	/**
-	 * @param  MiddlewareInterface      $middleware
-	 * @param  RequestHandlerInterface  $next
+	 * @param  ResponseInterface  $response
+	 * @param  Router             $router
 	 */
 	public function __construct(
-		protected MiddlewareInterface $middleware,
-		protected RequestHandlerInterface $next,
-	) {
-	}
+		protected ResponseInterface $response,
+		protected Router $router
+	) { }
 
 	/**
 	 * @param  ServerRequestInterface  $request
@@ -28,6 +26,7 @@ class MiddlewareDispatcher implements RequestHandlerInterface
 	 */
 	public function handle(ServerRequestInterface $request): ResponseInterface
 	{
-		return $this->middleware->process($request, $this->next);
+		$this->router->setRequest($request);
+		return $this->response;
 	}
 }
