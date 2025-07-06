@@ -79,7 +79,7 @@ jobs:
         run: vendor/bin/phpunit tests --colors=always --testdox --do-not-fail-on-empty-test-suite
 
       - name: 🧪 Generate coverage report
-        run: vendor/bin/phpunit --coverage-text --coverage-clover=coverage.xml
+        run: vendor/bin/phpunit tests --coverage-text --coverage-clover=coverage.xml --do-not-fail-on-empty-test-suite
 
       - name: 🔎 Run static analysis
         run: vendor/bin/phpstan analyse --level=max src tests
