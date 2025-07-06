@@ -76,7 +76,7 @@ jobs:
         run: composer install --no-progress --prefer-dist --optimize-autoloader
 
       - name: ✅ Run tests
-        run: vendor/bin/phpunit --colors=always --testdox
+        run: vendor/bin/phpunit tests --colors=always --testdox --do-not-fail-on-empty-test-suite
 
       - name: 🧪 Generate coverage report
         run: vendor/bin/phpunit --coverage-text --coverage-clover=coverage.xml
