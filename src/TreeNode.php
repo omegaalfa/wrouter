@@ -4,10 +4,12 @@ declare(strict_types = 1);
 
 namespace Omegaalfa\Wrouter;
 
+use Psr\Http\Server\MiddlewareInterface;
+
 class TreeNode
 {
 	/**
-	 * @var array
+	 * @var array<string, TreeNode>
 	 */
 	public array $children = [];
 
@@ -27,7 +29,7 @@ class TreeNode
 	public ?string $parameterName = null;
 
 	/**
-	 * @var array
+	 * @var array<int, MiddlewareInterface>
 	 */
 	public array $middlewares = [];
 }

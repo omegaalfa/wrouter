@@ -24,11 +24,7 @@ PHP 8.1 or higher
 # Examples
 
 ```php
-use OmegaAlfa\Wrouter\Wrouter;
-use Laminas\Diactoros\Response;
-use Laminas\Diactoros\ServerRequestFactory;
-use Psr\Http\Message\RequestInterface;
-use Psr\Http\Message\ResponseInterface;
+use Laminas\Diactoros\Response;use Laminas\Diactoros\ServerRequestFactory;use Omegaalfa\Wrouter\Router\Wrouter;use Psr\Http\Message\RequestInterface;use Psr\Http\Message\ResponseInterface;
 
 $request = ServerRequestFactory::fromGlobals();
 $response = new Response();
@@ -37,13 +33,13 @@ $router = new Wrouter($response);
 
 // Add a route
 $router->get('/users/:id', function (RequestInterface $request, ResponseInterface $response, $params) {
-    // Route handler logic
+    // Router handler logic
     echo "User ID:" . $params[':id'];
     return $response;
 });
 
 $router->get('/admin', function (RequestInterface $request, ResponseInterface $response) {
-    // Route handler logic
+    // Router handler logic
     return $response;
 }, [new \src\router\src\LoggingMiddleware]);
 
