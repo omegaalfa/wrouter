@@ -4,10 +4,23 @@
   "license": "MIT",
   "description": "This library implements the Trie routing logic",
   "keywords": [
-    "router", "routes", "routeTree", "TreeRoute", "NodeRoute",
-    "Prefix Trees", "PSR", "PSR-7", "PSR-15", "HTTP",
-    "message", "requests", "response", "middleware",
-    "Laminas", "Diactoros", "php8"
+    "router",
+    "routes",
+    "routeTree",
+    "TreeRoute",
+    "NodeRoute",
+    "Prefix Trees",
+    "PSR",
+    "PSR-7",
+    "PSR-15",
+    "HTTP",
+    "message",
+    "requests",
+    "response",
+    "middleware",
+    "Laminas",
+    "Diactoros",
+    "php8"
   ],
   "authors": [
     {
@@ -31,16 +44,16 @@
   },
   "autoload-dev": {
     "psr-4": {
-      "Omegaalfa\\Wrouter\\Tests\\": "tests/"
+      "Omegaalfa\\Wrouter\\Tests\\": "tests/RouterTest.php"
     }
   },
   "require-dev": {
-    "phpunit/phpunit": "^10.0",
-    "phpstan/phpstan": "2.1.x-dev"
+    "phpunit/phpunit": "^9.5 || ^10.0",
+    "friendsofphp/php-cs-fixer": "^3.0"
   },
   "scripts": {
     "test": "phpunit",
-    "phpstan": "vendor/bin/phpstan analyse src tests --level=7"
+    "php-cs-fixer-dry-run": "php-cs-fixer fix --dry-run"
   },
   "minimum-stability": "dev"
 }

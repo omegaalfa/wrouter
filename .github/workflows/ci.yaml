@@ -1,19 +1,21 @@
 name: 🧪 CI
+
 on:
   push:
     branches:
       - 'main'
   pull_request:
+
 jobs:
   tests:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        php: ["8.1"]
+        php: ["8.4"]
     name: ⚙️ Running test for PHP ${{ matrix.php }}
     steps:
       - name: 📥 Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
@@ -56,6 +58,10 @@ jobs:
         with:
           php-version: ${{ matrix.php }}
           coverage: xdebug
+          tools: composer:v2, phpstan
+
+      - name: 🔍 Check PHP version
+        run: php -v
 
       - name: 📦 Cache Composer packages
         id: composer-cache
@@ -68,3 +74,13 @@ jobs:
 
       - name: 📥 Install dependencies
         run: composer install --no-progress --prefer-dist --optimize-autoloader
+
+      - name: ✅ Run tests
+        run: vendor/bin/phpunit --colors=always --testdox
+      
+      - name: 🧪 Generate coverage report
+        run: vendor/bin/phpunit --coverage-text --coverage-clover=coverage.xml
+      
+      - name: 🔎 Run static analysis
+        run: vendor/bin/phpstan analyse --level=max src tests
+
