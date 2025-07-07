@@ -54,7 +54,7 @@ class Router extends TreeRouter
     public function __construct(?ResponseInterface $response = null, ?ServerRequestInterface $request = null, array $middlewares = [])
     {
         $this->response = $response ?? new Response();
-        $this->request = new ParsedBody()->process($request ?? ServerRequestFactory::fromGlobals());
+        $this->request = (new ParsedBody())->process($request ?? ServerRequestFactory::fromGlobals());
         $this->middlewares = $middlewares;
         parent::__construct();
     }
@@ -191,7 +191,7 @@ class Router extends TreeRouter
             return $response->withStatus(500);
         }
 
-        return new Dispatcher($handler, $response, $params)->handle($this->request);
+        return (new Dispatcher($handler, $response, $params))->handle($this->request);
     }
 
     /**
