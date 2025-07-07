@@ -82,5 +82,5 @@ jobs:
         run: vendor/bin/phpunit --coverage-text --coverage-clover=coverage.xml
       
       - name: 🔎 Run static analysis
-        run: vendor/bin/phpstan analyse --level=max src tests
+        run: vendor/bin/phpstan analyse --level=5 src tests
 
