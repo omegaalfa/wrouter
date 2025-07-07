@@ -94,7 +94,7 @@ class Wrouter extends Router
      */
     public function emitResponse(ResponseInterface $response): bool
     {
-        return (new Emitter())->emit($response);
+        return new Emitter()->emit($response);
     }
 
 
