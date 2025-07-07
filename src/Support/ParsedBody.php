@@ -66,7 +66,7 @@ class ParsedBody
         try {
             $parsedBody = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
 
-            if (!is_array($parsedBody) && !is_object($parsedBody)) {
+            if (!is_array($parsedBody)) {
                 throw new \InvalidArgumentException('O corpo da requisição JSON não é válido.');
             }
 

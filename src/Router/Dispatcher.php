@@ -26,10 +26,16 @@ class Dispatcher
     /**
      * @param ServerRequestInterface|null $request
      *
-     * @return ResponseInterface|null
+     * @return ?ResponseInterface
      */
-    public function handle(?ServerRequestInterface $request): ResponseInterface|null
+    public function handle(?ServerRequestInterface $request): ?ResponseInterface
     {
-        return ($this->handler)($request, $this->response, $this->params);
+        $result = ($this->handler)($request, $this->response, $this->params);
+
+        if ($result instanceof ResponseInterface || $result === null) {
+            return $result;
+        }
+
+        throw new \RuntimeException('Handler did not return a ResponseInterface.');
     }
 }

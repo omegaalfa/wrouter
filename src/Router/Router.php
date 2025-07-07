@@ -49,12 +49,12 @@ class Router extends TreeRouter
     /**
      * @param ResponseInterface|null $response
      * @param ServerRequestInterface|null $request
-     * @param array $middlewares
+     * @param array<int, MiddlewareInterface> $middlewares
      */
     public function __construct(?ResponseInterface $response = null, ?ServerRequestInterface $request = null, array $middlewares = [])
     {
         $this->response = $response ?? new Response();
-        $this->request = (new ParsedBody())->process($request ?? ServerRequestFactory::fromGlobals());
+        $this->request = new ParsedBody()->process($request ?? ServerRequestFactory::fromGlobals());
         $this->middlewares = $middlewares;
         parent::__construct();
     }
@@ -104,19 +104,6 @@ class Router extends TreeRouter
     }
 
     /**
-     * @param string $uri
-     * @return string
-     */
-    private function uriHelper(string $uri): string
-    {
-        if (false !== $pos = strpos($uri, '?')) {
-            $uri = substr($uri, 0, $pos);
-        }
-
-        return rawurldecode($uri);
-    }
-
-    /**
      * @param string $method
      * @param string $path
      * @param callable $handler
@@ -126,6 +113,10 @@ class Router extends TreeRouter
     protected function map(string $method, string $path, callable $handler): void
     {
         $method = strtoupper($method);
+        if (!$this->request) {
+            throw new \RuntimeException("Request is null");
+        }
+
         $uriPath = $this->request->getUri()->getPath();
         if (!HttpMethod::isValid($method)) {
             throw new \RuntimeException('HTTP method not supported');
@@ -172,7 +163,7 @@ class Router extends TreeRouter
         $response = $this->response;
         $handler = $currentNode['handler'] ?? null;
         $middlewares = $currentNode['middlewares'] ?? [];
-        $params = $currentNode['parameters'] ?? [];
+        $params = [];
 
         if (is_null($currentNode) || is_null($handler)) {
             return $response?->withStatus(404);
@@ -186,7 +177,7 @@ class Router extends TreeRouter
                 return $response->withStatus(500);
             }
 
-            if (is_array($middlewares) && $middlewares) {
+            if ($middlewares !== []) {
                 $response = $this->handlerMiddleware($middlewares, new RequestHandler($response, $this));
             }
 
@@ -196,7 +187,11 @@ class Router extends TreeRouter
             }
         }
 
-        return (new Dispatcher($handler, $response, $params))->handle($this->request);
+        if (!$handler instanceof \Closure) {
+            return $response->withStatus(500);
+        }
+
+        return new Dispatcher($handler, $response, $params)->handle($this->request);
     }
 
     /**
@@ -212,15 +207,5 @@ class Router extends TreeRouter
         }
 
         return $dispatcherHandler->handle($this->request);
-    }
-
-    /**
-     * @param list<mixed> $array
-     *
-     * @return Generator
-     */
-    private function arrayToGenerator(array $array): Generator
-    {
-        yield from $array;
     }
 }

@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Omegaalfa\Wrouter\Router;
 
 
+use Psr\Http\Server\MiddlewareInterface;
+
 class TreeRouter
 {
     /**
@@ -20,7 +22,7 @@ class TreeRouter
     /**
      * @param string $path
      * @param callable $handler
-     * @param array $middlewares
+     * @param array<int, MiddlewareInterface> $middlewares
      *
      * @return void
      */
@@ -50,7 +52,7 @@ class TreeRouter
     /**
      * @param string $path
      *
-     * @return array|null
+     * @return array{handler: callable, middlewares: array<int, MiddlewareInterface>}|null
      */
     protected function findRoute(string $path): ?array
     {
@@ -67,7 +69,7 @@ class TreeRouter
 
             $currentNode = $currentNode->children[$segment];
         }
-        if ($currentNode->isEndOfRoute) {
+        if ($currentNode->isEndOfRoute && is_callable($currentNode->handler)) {
             return [
                 'handler' => $currentNode->handler,
                 'middlewares' => $currentNode->middlewares,

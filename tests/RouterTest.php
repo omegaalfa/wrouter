@@ -84,7 +84,7 @@ class RouterTest extends TestCase
         $router = new Wrouter();
         $router->setRequest($request);
 
-        $router->group('/api', function (Router $r) {
+        $router->group('/api', function (Wrouter $r) {
             $r->get('/ping', function (ServerRequestInterface $request, ResponseInterface $response) {
                 $response->getBody()->write('pong');
                 return $response->withStatus(200);
@@ -105,7 +105,13 @@ class RouterTest extends TestCase
         $log = [];
 
         $middleware = new class($log) implements MiddlewareInterface {
-            public function __construct(public array &$log) {}
+            /** @var array<int, mixed> */
+            private array $log;
+
+            public function __construct(array &$log)
+            {
+                $this->log = &$log;
+            }
 
             public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
             {
