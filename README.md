@@ -155,7 +155,7 @@ src/
 
 ## 📜 Requisitos
 
-- PHP 8.1 ou superior
+- PHP 8.4 ou superior
 - PSR-7 (`psr/http-message`)
 - PSR-15 para middlewares
 
