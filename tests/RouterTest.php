@@ -105,13 +105,7 @@ class RouterTest extends TestCase
         $log = [];
 
         $middleware = new class($log) implements MiddlewareInterface {
-            /** @var array<int, mixed> */
-            private array $log;
-
-            public function __construct(array &$log)
-            {
-                $this->log = &$log;
-            }
+            public function __construct(public array &$log) {}
 
             public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
             {
