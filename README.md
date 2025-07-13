@@ -39,7 +39,8 @@ $router->get('/hello', function ($request, $response) {
     return new JsonResponse(['message' => 'Hello World']);
 });
 
-$router->dispatcher('/hello');
+$response = $router->dispatcher('/hello');
+$router->emitResponse($response);
 ```
 
 ---
