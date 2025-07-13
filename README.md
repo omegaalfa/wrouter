@@ -95,7 +95,7 @@ Você pode gerar rotas em cache para melhorar desempenho:
 
 ```php
 $routerCache = new RouterCache();
-$routerCache->generateRoutes('/api/user/{id}', 'GET', function($req, $res) {
+$routerCache->generateRoutes('/api/user/:id', 'GET', function($req, $res) {
     // Handler da rota
 });
 ```
