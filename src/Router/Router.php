@@ -135,6 +135,7 @@ class Router extends TreeRouter
         }
 
         if ($uriPath !== $path && str_contains($path, ":") && $this->matchRoute($path, $uriPath)) {
+            $this->dynamicParams = $path;
             $this->addRoute($uriPath, $handler, array_merge($this->groupMiddlewares, $this->middlewares));
         }
     }

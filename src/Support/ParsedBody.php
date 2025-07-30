@@ -36,6 +36,7 @@ class ParsedBody
             'application/x-www-form-urlencoded',
             'application/xml',
             'text/xml',
+            'multipart/form-data',
         ];
     }
 
@@ -51,6 +52,7 @@ class ParsedBody
             'application/json' => $this->parseJson($request),
             'application/x-www-form-urlencoded' => $this->parseFormUrlEncoded($request),
             'application/xml', 'text/xml' => $this->parseXml($request),
+            'multipart/form-data' => $this->parseMultipart($request),
             default => $request,
         };
     }
@@ -107,6 +109,21 @@ class ParsedBody
                 // Log or handle the error
                 return $request;
             }
+        }
+
+        return $request;
+    }
+
+    /**
+     * @param ServerRequestInterface $request
+     *
+     * @return ServerRequestInterface
+     */
+    private function parseMultipart(ServerRequestInterface $request): ServerRequestInterface
+    {
+        $parsedBody = $request->getParsedBody();
+        if (empty($parsedBody) && !empty($_POST)) {
+            return $request->withParsedBody($_POST);
         }
 
         return $request;

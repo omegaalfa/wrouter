@@ -82,7 +82,7 @@ class Wrouter extends Router
     private function addMiddleware(array $middlewares): void
     {
         $this->middlewares = [];
-        if($middlewares) {
+        if ($middlewares) {
             $this->middlewares = array_merge($this->middlewares, $middlewares);
         }
     }
@@ -119,10 +119,6 @@ class Wrouter extends Router
             ], JSON_THROW_ON_ERROR));
         } catch (JsonException $e) {
             $response?->getBody()->write($e->getMessage());
-        }
-
-        if (!is_null($response)) {
-            $this->emitResponse($response);
         }
 
         return $response;

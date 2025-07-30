@@ -14,6 +14,16 @@ class TreeRouter
      */
     protected TreeNode $root;
 
+    public string $dynamicParams
+        {
+            set (string $value) {
+                preg_match_all('/:([a-zA-Z_][a-zA-Z0-9_]*)/', $value, $matches);
+                foreach ( $matches[1] as $match) {
+                    //var_dump($match);
+                }
+            }
+        }
+
     public function __construct()
     {
         $this->root = new TreeNode();
@@ -54,7 +64,7 @@ class TreeRouter
      *
      * @return array{handler: callable, middlewares: array<int, MiddlewareInterface>}|null
      */
-    protected function findRoute(string $path): ?array
+    public function findRoute(string $path): ?array
     {
         $currentNode = $this->root;
         $parts = explode('/', trim($path, '/'));
