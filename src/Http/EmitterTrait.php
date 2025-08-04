@@ -29,13 +29,14 @@ trait EmitterTrait
     {
         $reasonPhrase = $response->getReasonPhrase();
         $statusCode = $response->getStatusCode();
-
-        header(sprintf(
-            'HTTP/%s %d%s',
-            $response->getProtocolVersion(),
-            $statusCode,
-            ($reasonPhrase ? ' ' . $reasonPhrase : '')
-        ), true, $statusCode);
+        if (!headers_sent()) {
+            header(sprintf(
+                'HTTP/%s %d%s',
+                $response->getProtocolVersion(),
+                $statusCode,
+                ($reasonPhrase ? ' ' . $reasonPhrase : '')
+            ), true, $statusCode);
+        }
     }
 
     /**
@@ -59,11 +60,13 @@ trait EmitterTrait
                 $name = $this->filterHeader($header);
                 $first = !($name === 'Set-Cookie');
                 foreach ($values as $value) {
-                    header(sprintf(
-                        '%s: %s',
-                        $name,
-                        $value
-                    ), $first, $statusCode);
+                    if (!headers_sent()) {
+                        header(sprintf(
+                            '%s: %s',
+                            $name,
+                            $value
+                        ), $first, $statusCode);
+                    }
                     $first = false;
                 }
             }
