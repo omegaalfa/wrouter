@@ -2,9 +2,10 @@
 
 declare(strict_types=1);
 
+use Laminas\Diactoros\Response;
 use Laminas\Diactoros\ServerRequest;
+use Laminas\Diactoros\ServerRequestFactory;
 use Laminas\Diactoros\Uri;
-use Omegaalfa\Wrouter\Router\Router;
 use Omegaalfa\Wrouter\Router\Wrouter;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
@@ -28,7 +29,7 @@ class RouterTest extends TestCase
         $response = $router->dispatcher('/hello');
 
         $this->assertSame(200, $response->getStatusCode());
-        $this->assertSame('Hello World', (string) $response->getBody());
+        $this->assertSame('Hello World', (string)$response->getBody());
     }
 
     public function testRouteNotFoundReturns404(): void
@@ -66,7 +67,7 @@ class RouterTest extends TestCase
         $response = $router->dispatcher('/test');
 
         $this->assertSame(200, $response->getStatusCode());
-        $this->assertSame('+middlewarehandler', (string) $response->getBody());
+        $this->assertSame('+middlewarehandler', (string)$response->getBody());
     }
 
     public function testGroupWithPrefixAndMiddleware(): void
@@ -94,7 +95,7 @@ class RouterTest extends TestCase
         $response = $router->dispatcher('/api/ping');
 
         $this->assertSame(200, $response->getStatusCode());
-        $this->assertSame(' [grouped]pong', (string) $response->getBody());
+        $this->assertSame(' [grouped]pong', (string)$response->getBody());
     }
 
     public function testGetRouteWithMiddleware(): void
@@ -105,7 +106,9 @@ class RouterTest extends TestCase
         $log = [];
 
         $middleware = new class($log) implements MiddlewareInterface {
-            public function __construct(public array &$log) {}
+            public function __construct(public array &$log)
+            {
+            }
 
             public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
             {
@@ -114,7 +117,7 @@ class RouterTest extends TestCase
             }
         };
 
-        $router = new Wrouter(new \Laminas\Diactoros\Response(), \Laminas\Diactoros\ServerRequestFactory::fromGlobals());
+        $router = new Wrouter(new Response(), ServerRequestFactory::fromGlobals());
 
         $router->get('/hello', function ($request, $response) use (&$log) {
             $log[] = 'handler';

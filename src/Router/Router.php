@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Omegaalfa\Wrouter\Router;
 
-use Generator;
+use Closure;
 use Laminas\Diactoros\Response;
 use Laminas\Diactoros\ServerRequestFactory;
 use Omegaalfa\Wrouter\Http\HttpMethod;
@@ -15,6 +15,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use RuntimeException;
 
 
 class Router extends TreeRouter
@@ -54,7 +55,7 @@ class Router extends TreeRouter
     public function __construct(?ResponseInterface $response = null, ?ServerRequestInterface $request = null, array $middlewares = [])
     {
         $this->response = $response ?? new Response();
-        $this->request = (new ParsedBody())->process($request ?? ServerRequestFactory::fromGlobals());
+        $this->request = new ParsedBody()->process($request ?? ServerRequestFactory::fromGlobals());
         $this->middlewares = $middlewares;
         parent::__construct();
     }
@@ -87,6 +88,43 @@ class Router extends TreeRouter
     }
 
     /**
+     * @param string $method
+     * @param string $path
+     * @param callable $handler
+     *
+     * @return void
+     */
+    protected function map(string $method, string $path, callable $handler): void
+    {
+        $method = strtoupper($method);
+        if (!$this->request) {
+            throw new RuntimeException("Request is null");
+        }
+
+        $uriPath = $this->request->getUri()->getPath();
+        if (!HttpMethod::isValid($method)) {
+            throw new RuntimeException('HTTP method not supported');
+        }
+
+        if ($this->group) {
+            $path = $this->buildFullPath($path);
+        }
+
+        if ($method !== $this->request->getMethod()) {
+            throw new RuntimeException('Method not valid');
+        }
+
+        if ($uriPath === $path) {
+            $this->addRoute($path, $handler, array_merge($this->groupMiddlewares, $this->middlewares));
+        }
+
+        if ($uriPath !== $path && str_contains($path, ":") && $this->matchRoute($path, $uriPath)) {
+            $this->dynamicParams = $path;
+            $this->addRoute($uriPath, $handler, array_merge($this->groupMiddlewares, $this->middlewares));
+        }
+    }
+
+    /**
      * Builds the full path for a route considering the current group prefix.
      *
      * @param string $path The path for the route.
@@ -101,43 +139,6 @@ class Router extends TreeRouter
         }
 
         return trim($prefix . trim($path, '/'));
-    }
-
-    /**
-     * @param string $method
-     * @param string $path
-     * @param callable $handler
-     *
-     * @return void
-     */
-    protected function map(string $method, string $path, callable $handler): void
-    {
-        $method = strtoupper($method);
-        if (!$this->request) {
-            throw new \RuntimeException("Request is null");
-        }
-
-        $uriPath = $this->request->getUri()->getPath();
-        if (!HttpMethod::isValid($method)) {
-            throw new \RuntimeException('HTTP method not supported');
-        }
-
-        if ($this->group) {
-            $path = $this->buildFullPath($path);
-        }
-
-        if ($method !== $this->request->getMethod()) {
-            throw new \RuntimeException('Method not valid');
-        }
-
-        if ($uriPath === $path) {
-            $this->addRoute($path, $handler, array_merge($this->groupMiddlewares, $this->middlewares));
-        }
-
-        if ($uriPath !== $path && str_contains($path, ":") && $this->matchRoute($path, $uriPath)) {
-            $this->dynamicParams = $path;
-            $this->addRoute($uriPath, $handler, array_merge($this->groupMiddlewares, $this->middlewares));
-        }
     }
 
     /**
@@ -174,7 +175,7 @@ class Router extends TreeRouter
             $this->request = null;
         }
         if (!is_null($response)) {
-            if (!$handler instanceof \Closure) {
+            if (!$handler instanceof Closure) {
                 return $response->withStatus(500);
             }
 
@@ -188,11 +189,11 @@ class Router extends TreeRouter
             }
         }
 
-        if (!$handler instanceof \Closure) {
+        if (!$handler instanceof Closure) {
             return $response->withStatus(500);
         }
 
-        return (new Dispatcher($handler, $response, $params))->handle($this->request);
+        return new Dispatcher($handler, $response, $params)->handle($this->request);
     }
 
     /**

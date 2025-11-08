@@ -22,7 +22,8 @@
     "psr/http-server-handler": "^1.0",
     "psr/http-server-middleware": "^1.0",
     "ext-simplexml": "*",
-    "ext-libxml": "*"
+    "ext-libxml": "*",
+    "predis/predis": "dev-main"
   },
   "autoload": {
     "psr-4": {
