@@ -84,18 +84,3 @@ jobs:
       - name: 🔎 Run static analysis
         run: vendor/bin/phpstan analyse --level=4 src tests
 
-  # ==========================
-  # 🔁 Auto-review setup
-  # ==========================
-  dependabot:
-    runs-on: ubuntu-latest
-    if: ${{ github.actor == 'dependabot[bot]' }}
-    steps:
-      - name: 🧠 Auto-assign reviewers
-        uses: marocchino/sticky-pull-request-comment@v2
-        with:
-          header: "🤖 Dependabot PR Auto-Review"
-          message: "Automatically requesting review from maintainers."
-
-      - name: 📝 Assign reviewers
-        uses: kentaro-m/auto-assign-action@v1.2.0
