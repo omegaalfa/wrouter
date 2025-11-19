@@ -19,7 +19,4 @@ class TreeNode
 
     /**@var mixed|null */
     public mixed $handler = null;
-
-    /**@var mixed */
-    public mixed $parameters = null;
 }
