@@ -4,25 +4,11 @@ declare(strict_types=1);
 
 namespace Omegaalfa\Wrouter\Router;
 
-
 use Psr\Http\Server\MiddlewareInterface;
 
 class TreeRouter
 {
-    /**
-     * @var TreeNode
-     */
     protected TreeNode $root;
-
-    public string $dynamicParams
-        {
-            set (string $value) {
-                preg_match_all('/:([a-zA-Z_][a-zA-Z0-9_]*)/', $value, $matches);
-                foreach ( $matches[1] as $match) {
-                    //var_dump($match);
-                }
-            }
-        }
 
     public function __construct()
     {
@@ -33,16 +19,14 @@ class TreeRouter
      * @param string $path
      * @param callable $handler
      * @param array<int, MiddlewareInterface> $middlewares
-     *
-     * @return void
      */
     protected function addRoute(string $path, callable $handler, array $middlewares = []): void
     {
         $currentNode = $this->root;
         $parts = explode('/', trim($path, '/'));
 
-        foreach ($parts as $key => $segment) {
-            if (empty($segment)) {
+        foreach ($parts as $segment) {
+            if ($segment === '') {
                 continue;
             }
 
@@ -58,34 +42,65 @@ class TreeRouter
         $currentNode->middlewares = $middlewares;
     }
 
-
     /**
-     * @param string $path
-     *
-     * @return array{handler: callable, middlewares: array<int, MiddlewareInterface>}|null
+     * @return array{handler: callable, middlewares: array<int, MiddlewareInterface>, params: array<string,string>}|null
      */
     public function findRoute(string $path): ?array
     {
         $currentNode = $this->root;
         $parts = explode('/', trim($path, '/'));
+        $params = [];
 
         foreach ($parts as $segment) {
-            if (empty($segment)) {
+            if ($segment === '' || $segment === null) {
                 continue;
             }
-            if (!isset($currentNode->children[$segment])) {
-                return null;
+
+            // 1 — match exato
+            if (isset($currentNode->children[$segment])) {
+                $currentNode = $currentNode->children[$segment];
+                continue;
             }
 
-            $currentNode = $currentNode->children[$segment];
+            // 2 — match paramétrico somente se EXISTIR filho paramétrico neste nível
+            $paramChildKey = null;
+            foreach ($currentNode->children as $childKey => $childNode) {
+                if ($childKey[0] === ':') {
+                    $paramChildKey = $childKey;
+                    break;
+                }
+            }
+
+            if ($paramChildKey !== null) {
+                $paramName = substr($paramChildKey, 1);
+                $params[$paramName] = $segment;
+                $currentNode = $currentNode->children[$paramChildKey];
+                continue;
+            }
+
+            // 3 — nenhum match → rota inválida
+            return null;
         }
+
+        // fim do caminho — só aceita se for final de rota
         if ($currentNode->isEndOfRoute && is_callable($currentNode->handler)) {
             return [
                 'handler' => $currentNode->handler,
                 'middlewares' => $currentNode->middlewares,
+                'params' => $params,
             ];
         }
 
         return null;
+    }
+
+
+    /**
+     * Valida a rota completa usando regex
+     */
+    private function matchRoute(string $route, string $path): bool
+    {
+        $pattern = '#^' . preg_replace('/:([a-zA-Z0-9_]+)/', '([a-zA-Z0-9_-]+)', $route) . '$#';
+        return preg_match($pattern, $path) === 1;
     }
 }

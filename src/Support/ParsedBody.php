@@ -99,7 +99,10 @@ class ParsedBody
     private function parseXml(ServerRequestInterface $request): ServerRequestInterface
     {
         $body = $request->getBody()->getContents();
+        $previous = libxml_use_internal_errors(true);
         $xml = simplexml_load_string($body, "SimpleXMLElement", LIBXML_NOENT | LIBXML_NOCDATA | LIBXML_NOBLANKS);
+        libxml_clear_errors();
+        libxml_use_internal_errors($previous);
 
         if ($xml !== false) {
             try {
