@@ -55,7 +55,10 @@ class Router extends TreeRouter
     public function __construct(?ResponseInterface $response = null, ?ServerRequestInterface $request = null, array $middlewares = [])
     {
         $this->response = $response ?? new Response();
-        $this->request = new ParsedBody()->process($request ?? ServerRequestFactory::fromGlobals());
+        if(is_null($request)){
+            $request = ServerRequestFactory::fromGlobals();
+        }
+        $this->request = new ParsedBody()->process($request);
         $this->middlewares = $middlewares;
         parent::__construct();
     }
@@ -88,6 +91,14 @@ class Router extends TreeRouter
     }
 
     /**
+     * @return string|null
+     */
+    public function getCurrentGroup(): ?string
+    {
+        return $this->group;
+    }
+
+    /**
      * @param string $method
      * @param string $path
      * @param callable $handler
@@ -96,12 +107,6 @@ class Router extends TreeRouter
      */
     protected function map(string $method, string $path, callable $handler): void
     {
-        $method = strtoupper($method);
-        if (!$this->request) {
-            throw new RuntimeException("Request is null");
-        }
-
-        $uriPath = $this->request->getUri()->getPath();
         if (!HttpMethod::isValid($method)) {
             throw new RuntimeException('HTTP method not supported');
         }
@@ -110,18 +115,7 @@ class Router extends TreeRouter
             $path = $this->buildFullPath($path);
         }
 
-        if ($method !== $this->request->getMethod()) {
-            throw new RuntimeException('Method not valid');
-        }
-
-        if ($uriPath === $path) {
-            $this->addRoute($path, $handler, array_merge($this->groupMiddlewares, $this->middlewares));
-        }
-
-        if ($uriPath !== $path && str_contains($path, ":") && $this->matchRoute($path, $uriPath)) {
-            $this->dynamicParams = $path;
-            $this->addRoute($uriPath, $handler, array_merge($this->groupMiddlewares, $this->middlewares));
-        }
+        $this->addRoute($path, $handler, array_merge($this->groupMiddlewares, $this->middlewares));
     }
 
     /**
@@ -142,19 +136,6 @@ class Router extends TreeRouter
     }
 
     /**
-     * @param string $route
-     * @param string $path
-     *
-     * @return bool
-     */
-    private function matchRoute(string $route, string $path): bool
-    {
-        $pattern = '#^' . preg_replace('/:([a-zA-Z0-9_]+)/', '([a-zA-Z0-9_-]+)', $route) . '$#';
-
-        return preg_match($pattern, $path) === 1;
-    }
-
-    /**
      * @param string $path
      *
      * @return ?ResponseInterface
@@ -163,37 +144,40 @@ class Router extends TreeRouter
     {
         $currentNode = $this->findRoute($path);
         $response = $this->response;
+
         $handler = $currentNode['handler'] ?? null;
         $middlewares = $currentNode['middlewares'] ?? [];
-        $params = [];
+        $params = $currentNode['params'] ?? [];
 
         if (is_null($currentNode) || is_null($handler)) {
             return $response?->withStatus(404);
         }
 
-        if (!isset($this->request)) {
-            $this->request = null;
-        }
-        if (!is_null($response)) {
-            if (!$handler instanceof Closure) {
-                return $response->withStatus(500);
-            }
-
-            if ($middlewares !== []) {
-                $response = $this->handlerMiddleware($middlewares, new RequestHandler($response, $this));
-            }
-
-            $statusCode = $response->getStatusCode();
-            if ($statusCode !== 200 && $statusCode !== 302) {
-                return $response;
+        // 1️⃣ APLICA PARAMETROS ANTES DE TUDO
+        $req = $this->request;
+        if ($req && is_array($params)) {
+            foreach ($params as $k => $v) {
+                $req = $req->withAttribute($k, $v);
             }
         }
+        $this->request = $req;
 
-        if (!$handler instanceof Closure) {
-            return $response->withStatus(500);
+        // 2️⃣ EXECUTA OS MIDDLEWARES (eles podem sobrescrever atributos)
+        if ($middlewares !== []) {
+            $response = $this->handlerMiddleware(
+                $middlewares,
+                new RequestHandler($response, $this)
+            );
         }
 
-        return new Dispatcher($handler, $response, $params)->handle($this->request);
+        // 3️⃣ Se middleware gerou erro (ex: 401), retorna imediatamente
+        $statusCode = $response->getStatusCode();
+        if ($statusCode !== 200 && $statusCode !== 302) {
+            return $response;
+        }
+
+        // 4️⃣ Finalmente executa o HANDLER
+        return ($handler)($this->request, $response);
     }
 
     /**

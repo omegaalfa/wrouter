@@ -7,6 +7,7 @@ namespace Omegaalfa\Wrouter\Http;
 enum HttpMethod: string
 {
     case GET = 'GET';
+
     case POST = 'POST';
     case PUT = 'PUT';
     case DELETE = 'DELETE';
@@ -31,7 +32,7 @@ enum HttpMethod: string
      */
     public static function all(): array
     {
-        return array_map(fn(self $method) => $method->value, self::cases());
+        return array_map(static fn(self $method) => $method->value, self::cases());
     }
 
 

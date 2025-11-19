@@ -26,11 +26,18 @@ class Dispatcher
     /**
      * @param ServerRequestInterface|null $request
      *
-     * @return ?ResponseInterface
+     * @return ResponseInterface|null
      */
     public function handle(?ServerRequestInterface $request): ?ResponseInterface
     {
-        $result = ($this->handler)($request, $this->response, $this->params);
+        $req = $request;
+        if ($req instanceof ServerRequestInterface && is_array($this->params) && count($this->params) > 0) {
+            foreach ($this->params as $key => $value) {
+                $req = $req->withAttribute($key, $value);
+            }
+        }
+
+        $result = ($this->handler)($req, $this->response);
 
         if ($result instanceof ResponseInterface || $result === null) {
             return $result;
