@@ -8,11 +8,94 @@ use Psr\Http\Server\MiddlewareInterface;
 
 class TreeRouter
 {
+    /**
+     * @var TreeNode
+     */
     protected TreeNode $root;
+
+    /** @var array<string, array{handler:callable,middlewares:array<int,MiddlewareInterface>,params:array<string,string>}> */
+    private array $staticMap = [];
+
+    /** @var array<string, array{handler:callable,middlewares:array<int,MiddlewareInterface>,params:array<string,string>}> */
+    private array $routeCache = [];
+
+    /**
+     * @var int
+     */
+    private int $cacheLimit = 2048; // adjust as needed
 
     public function __construct()
     {
         $this->root = new TreeNode();
+    }
+
+    /**
+     * @return array{handler: callable, middlewares: array<int, MiddlewareInterface>, params: array<string,string>}|null
+     */
+    public function findRoute(string $path): ?array
+    {
+        // normalize incoming path: ensure leading slash and no trailing multiple slashes
+        $normalized = '/' . preg_replace('#/+#', '/', ltrim($path, '/'));
+
+        // static fast map
+        if (isset($this->staticMap[$normalized])) {
+            return $this->staticMap[$normalized];
+        }
+
+        // cache
+        if (isset($this->routeCache[$normalized])) {
+            // move to end (simple LRU emulation)
+            $entry = $this->routeCache[$normalized];
+            unset($this->routeCache[$normalized]);
+            $this->routeCache[$normalized] = $entry;
+            return $entry;
+        }
+
+        $currentNode = $this->root;
+        $p = ltrim($normalized, '/');
+        $parts = $p === '' ? [] : explode('/', $p);
+        $params = [];
+
+        foreach ($parts as $segment) {
+            if ($segment === '') continue;
+
+            // 1 — exact child
+            if (isset($currentNode->children[$segment])) {
+                $currentNode = $currentNode->children[$segment];
+                continue;
+            }
+
+            // 2 — param child
+            if ($currentNode->paramChild !== null) {
+                $params[$currentNode->paramName ?? 'param'] = $segment;
+                $currentNode = $currentNode->paramChild;
+                continue;
+            }
+
+            // 3 — no match
+            return null;
+        }
+
+        if ($currentNode->isEndOfRoute && is_callable($currentNode->handler)) {
+            $result = [
+                'handler' => $currentNode->handler,
+                'middlewares' => $currentNode->middlewares,
+                'params' => $params,
+            ];
+
+            // store in cache
+            $this->routeCache[$normalized] = $result;
+            if (count($this->routeCache) > $this->cacheLimit) {
+                // drop oldest
+                reset($this->routeCache);
+                $k = key($this->routeCache);
+                unset($this->routeCache[$k]);
+            }
+
+            return $result;
+        }
+
+        return null;
     }
 
     /**
@@ -22,11 +105,35 @@ class TreeRouter
      */
     protected function addRoute(string $path, callable $handler, array $middlewares = []): void
     {
+        // normalize without excessive trimming
+        $p = ltrim($path, '/');
+
+        // register static fast-path
+        if (!str_contains($p, ':')) {
+            $this->staticMap['/' . ($p)] = [
+                'handler' => $handler,
+                'middlewares' => $middlewares,
+                'params' => [],
+            ];
+            // still store in trie so hierarchical logic remains
+        }
+
         $currentNode = $this->root;
-        $parts = explode('/', trim($path, '/'));
+        $parts = $p === '' ? [] : explode('/', $p);
 
         foreach ($parts as $segment) {
             if ($segment === '') {
+                continue;
+            }
+
+            if ($segment[0] === ':') {
+                $name = substr($segment, 1);
+                if ($currentNode->paramChild === null) {
+                    $currentNode->paramChild = new TreeNode();
+                    $currentNode->paramName = $name;
+                }
+                // if param name differs, we keep first registered param name (common behavior)
+                $currentNode = $currentNode->paramChild;
                 continue;
             }
 
@@ -40,67 +147,5 @@ class TreeRouter
         $currentNode->isEndOfRoute = true;
         $currentNode->handler = $handler;
         $currentNode->middlewares = $middlewares;
-    }
-
-    /**
-     * @return array{handler: callable, middlewares: array<int, MiddlewareInterface>, params: array<string,string>}|null
-     */
-    public function findRoute(string $path): ?array
-    {
-        $currentNode = $this->root;
-        $parts = explode('/', trim($path, '/'));
-        $params = [];
-
-        foreach ($parts as $segment) {
-            if ($segment === '' || $segment === null) {
-                continue;
-            }
-
-            // 1 — match exato
-            if (isset($currentNode->children[$segment])) {
-                $currentNode = $currentNode->children[$segment];
-                continue;
-            }
-
-            // 2 — match paramétrico somente se EXISTIR filho paramétrico neste nível
-            $paramChildKey = null;
-            foreach ($currentNode->children as $childKey => $childNode) {
-                if ($childKey[0] === ':') {
-                    $paramChildKey = $childKey;
-                    break;
-                }
-            }
-
-            if ($paramChildKey !== null) {
-                $paramName = substr($paramChildKey, 1);
-                $params[$paramName] = $segment;
-                $currentNode = $currentNode->children[$paramChildKey];
-                continue;
-            }
-
-            // 3 — nenhum match → rota inválida
-            return null;
-        }
-
-        // fim do caminho — só aceita se for final de rota
-        if ($currentNode->isEndOfRoute && is_callable($currentNode->handler)) {
-            return [
-                'handler' => $currentNode->handler,
-                'middlewares' => $currentNode->middlewares,
-                'params' => $params,
-            ];
-        }
-
-        return null;
-    }
-
-
-    /**
-     * Valida a rota completa usando regex
-     */
-    private function matchRoute(string $route, string $path): bool
-    {
-        $pattern = '#^' . preg_replace('/:([a-zA-Z0-9_]+)/', '([a-zA-Z0-9_-]+)', $route) . '$#';
-        return preg_match($pattern, $path) === 1;
     }
 }

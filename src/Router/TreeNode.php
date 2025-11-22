@@ -14,6 +14,16 @@ class TreeNode
     /** @var array<int, MiddlewareInterface> */
     public array $middlewares = [];
 
+    /**
+     * @var TreeNode|null
+     */
+    public ?TreeNode $paramChild = null;
+
+    /**
+     * @var string|null
+     */
+    public ?string $paramName = null;
+
     /** @var bool */
     public bool $isEndOfRoute = false;
 

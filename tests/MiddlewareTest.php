@@ -16,7 +16,7 @@ final class MiddlewareTest extends TestCase
     public function testMiddlewareOverridesRouteParams(): void
     {
         // Request simulado para o dispatcher
-        $request = (new ServerRequest())
+        $request = new ServerRequest()
             ->withMethod('GET')
             ->withUri(new \Laminas\Diactoros\Uri('/hello/22/marcos'));
 
@@ -61,7 +61,7 @@ final class MiddlewareTest extends TestCase
 
     public function testMiddlewareChainExecutesBeforeHandler(): void
     {
-        $request = (new ServerRequest())
+        $request = new ServerRequest()
             ->withMethod('GET')
             ->withUri(new \Laminas\Diactoros\Uri('/user/50'));
 

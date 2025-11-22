@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Omegaalfa\Wrouter\Router;
 
-use Closure;
 use Laminas\Diactoros\Response;
 use Laminas\Diactoros\ServerRequestFactory;
 use Omegaalfa\Wrouter\Http\HttpMethod;
@@ -55,7 +54,7 @@ class Router extends TreeRouter
     public function __construct(?ResponseInterface $response = null, ?ServerRequestInterface $request = null, array $middlewares = [])
     {
         $this->response = $response ?? new Response();
-        if(is_null($request)){
+        if (is_null($request)) {
             $request = ServerRequestFactory::fromGlobals();
         }
         $this->request = new ParsedBody()->process($request);
@@ -155,7 +154,7 @@ class Router extends TreeRouter
 
         // 1️⃣ APLICA PARAMETROS ANTES DE TUDO
         $req = $this->request;
-        if ($req && is_array($params)) {
+        if ($req !== null && !empty($params)) {
             foreach ($params as $k => $v) {
                 $req = $req->withAttribute($k, $v);
             }

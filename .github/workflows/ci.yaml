@@ -46,9 +46,9 @@ jobs:
         run: |
           echo "Debug: Commit check output: '${{ steps.commit-check.outputs.stdout }}'"
           if [ -n "${{ steps.commit-check.outputs.stdout }}" ]; then
-            echo "Commit messages are following Conventional Commits specification."
+            echo "Commit messages follow Conventional Commits."
           else
-            echo "Some commit messages do not follow Conventional Commits specification."
+            echo "Some commit messages do not follow Conventional Commits."
             git log --format='%s' "${LAST_COMMIT}..${CURRENT_COMMIT}"
             exit 1
           fi
@@ -77,10 +77,12 @@ jobs:
 
       - name: ✅ Run tests
         run: vendor/bin/phpunit --colors=always --testdox
-      
+
       - name: 🧪 Generate coverage report
         run: vendor/bin/phpunit --coverage-text --coverage-clover=coverage.xml
-      
+
       - name: 🔎 Run static analysis
         run: vendor/bin/phpstan analyse --level=4 src tests
 
+      - name: ⚡ Run router benchmark
+        run: php benchmark/bench.php --method=GET --iterations=2000 --warmup=50

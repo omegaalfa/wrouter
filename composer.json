@@ -22,12 +22,7 @@
     "psr/http-server-handler": "^1.0",
     "psr/http-server-middleware": "^1.0",
     "ext-simplexml": "*",
-    "ext-libxml": "*",
-    "predis/predis": "dev-main",
-    "davenusbaum/jaunt": "*",
-    "phroute/phroute": "*",
-    "omegaalfa/jwtoken": "dev-main",
-    "symfony/routing": "8.1.x-dev"
+    "ext-libxml": "*"
   },
   "autoload": {
     "psr-4": {
@@ -42,11 +37,18 @@
   "require-dev": {
     "phpunit/phpunit": "^10.0 || ^12.0",
     "phpstan/phpstan": "^1.11 || ^2.0",
-    "infection/infection": "dev-master"
+    "infection/infection": "dev-master",
+
+    "predis/predis": "dev-main",
+    "davenusbaum/jaunt": "*",
+    "phroute/phroute": "*",
+    "omegaalfa/jwtoken": "dev-main",
+    "symfony/routing": "^7.0",
+    "slim/slim": "^4.0"
   },
   "scripts": {
     "test": "phpunit",
-    "phpstan": "phpstan analyse src tests --level=5"
+    "phpstan": "phpstan analyse src --level=6"
   },
   "minimum-stability": "dev",
   "config": {

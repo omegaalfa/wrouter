@@ -36,16 +36,6 @@ final class RouterReflectionTest extends TestCase
         $this->assertSame('/dashboard', $method->invoke($this->router, '/dashboard'));
     }
 
-    public function testMatchRouteValidatesDynamicSegments(): void
-    {
-        $reflection = new \ReflectionClass(Router::class);
-        $method = $reflection->getMethod('matchRoute');
-        $method->setAccessible(true);
-
-        $this->assertTrue($method->invoke($this->router, '/users/:id', '/users/42'));
-        $this->assertFalse($method->invoke($this->router, '/users/:id', '/profiles/42'));
-    }
-
     public function testHandlerMiddlewareWrappingOrder(): void
     {
         $reflection = new \ReflectionClass(Router::class);
