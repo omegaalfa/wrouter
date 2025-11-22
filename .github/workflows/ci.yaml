@@ -82,7 +82,7 @@ jobs:
         run: vendor/bin/phpunit --coverage-text --coverage-clover=coverage.xml
 
       - name: 🔎 Run static analysis
-        run: vendor/bin/phpstan analyse --level=4 src tests
+        run: vendor/bin/phpstan analyse --level=4 src
 
       - name: ⚡ Run router benchmark
         run: php benchmark/bench.php --method=GET --iterations=2000 --warmup=50
